@@ -3,3 +3,4 @@ dist/
 .env.local
 .env
 .firebase/
+firebase-debug.log

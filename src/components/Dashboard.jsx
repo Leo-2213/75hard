@@ -6,15 +6,16 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { logout, fetchUserProgress, saveDayProgress, fetchUserDoc } from '../services/firebase';
 import DayCard  from './DayCard';
 import DayModal from './DayModal';
+import NamePromptModal from './NamePromptModal';
 
 // ── Motivational quotes ──────────────────────────────
 const QUOTES = [
-  "Keep going Sameeraa 💪 — discipline beats motivation every time.",
+  "Keep going {name} 💪 — discipline beats motivation every time.",
   "You are building the best version of yourself, one day at a time 🌟",
   "Hard days build strong people. You've got this 🔥",
   "Every rep, every page, every drop of water — it all counts 💧",
   "The pain you feel today is the strength you'll have tomorrow ✨",
-  "Sameeraa, you're rewriting your story. One hard day at a time 📖",
+  "{name}, you're rewriting your story. One hard day at a time 📖",
 ];
 
 // ── Styles ────────────────────────────────────────────
@@ -174,7 +175,7 @@ export default function Dashboard({ user }) {
   const [progress,      setProgress]      = useState({});   // { day_1: {...}, ... }
   const [selectedDay,   setSelectedDay]   = useState(null); // day number or null
   const [loadingData,   setLoadingData]   = useState(true);
-  const [userName,      setUserName]      = useState('Sameeraa');
+  const [userName,      setUserName]      = useState(true);
   const [quoteIdx,      setQuoteIdx]      = useState(0);
   const [toast,         setToast]         = useState('');
   const [showResetConfirm, setShowResetConfirm] = useState(false);

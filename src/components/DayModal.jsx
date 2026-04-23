@@ -304,7 +304,7 @@ export default function DayModal({ dayNum, initialData, onSave, onClose }) {
         {/* ── Completion banner ── */}
         {isComplete && (
           <div style={S.completeBadge}>
-            🎉 Day {dayNum} fully complete! You're crushing it, Sameeraa!
+            🎉 Day {dayNum} fully complete! You're crushing it, {userName}!
           </div>
         )}
 

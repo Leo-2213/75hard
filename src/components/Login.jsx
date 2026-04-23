@@ -251,7 +251,7 @@ export default function Login() {
         <span style={S.emoji}>🔥</span>
         <h1 style={S.heading}>75 Hard<br />Challenge</h1>
         <p style={S.subheading}>
-          {mode === 'login' ? 'Welcome back, champion 💜' : "Let's start your journey, Sameeraa!"}
+          {mode === 'login' ? 'Welcome back, champion 💜' : "Let's start your journey!"}
         </p>
 
         {/* Login / Signup Tabs */}
@@ -264,17 +264,17 @@ export default function Login() {
         {error && <div style={S.errorBox}>{error}</div>}
 
         {/* Form */}
-        <form onSubmit={handleEmailAuth}>
+        <form onSubmit={handleEmailAuth} autoComplete="off">
           {mode === 'signup' && (
             <>
               <label style={S.label}>Your Name</label>
               <input
                 style={S.input}
                 type="text"
-                placeholder="Sameeraa"
+                placeholder="Enter your name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                autoComplete="name"
+                autoComplete="off"
               />
             </>
           )}
@@ -286,7 +286,7 @@ export default function Login() {
             placeholder="you@email.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            autoComplete="email"
+            autoComplete="off"
             required
           />
 
@@ -297,7 +297,7 @@ export default function Login() {
             placeholder="••••••••"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
+            autoComplete="new-password"
             required
           />
 

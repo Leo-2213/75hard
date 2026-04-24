@@ -2,12 +2,14 @@
 // src/components/Login.jsx
 // Beautiful claymorphic login / sign-up page
 // =====================================================
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   signInWithGoogle,
   loginWithEmail,
   registerWithEmail,
 } from '../services/firebase';
+import { getRedirectResult } from 'firebase/auth';
+import { auth } from '../services/firebase';
 
 // ── Inline styles (self-contained, no CSS file dependency) ──
 const S = {
@@ -230,17 +232,28 @@ export default function Login() {
     }
   };
 
+  useEffect(() => {
+    getRedirectResult(auth)
+        .then((result) => {
+          if (result?.user) {
+            // Sign-in succeeded — App.jsx will automatically
+            // detect the user via onAuthStateChanged and redirect to Dashboard
+          }
+        })
+        .catch((error) => {
+          console.error("Redirect sign-in error:", error);
+          // Optionally show an error message to the user
+        });
+  }, []);
+
   const handleGoogle = async () => {
     setError('');
     setLoading(true);
     try {
-      await signInWithGoogle();
+      await signInWithGoogle(); // now triggers a redirect, no popup
     } catch (err) {
-      if (err.code !== 'auth/popup-closed-by-user') {
-        setError('Google sign-in failed. Please try again.');
-      }
-    } finally {
-      setLoading(false);
+      setError('Google sign-in failed. Please try again.');
+      setLoading(false); // only reset on error; redirect leaves the page anyway
     }
   };
 

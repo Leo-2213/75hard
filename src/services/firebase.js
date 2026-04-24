@@ -5,13 +5,14 @@
 import { initializeApp } from 'firebase/app';
 import {
   getAuth,
-  GoogleAuthProvider,
-  signInWithPopup,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
   updateProfile,
 } from 'firebase/auth';
+import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
+import { GoogleAuthProvider, signInWithCredential, signInWithPopup } from 'firebase/auth';
+import { Capacitor } from '@capacitor/core';
 import {
   getFirestore,
   doc,
@@ -51,8 +52,28 @@ export const googleProvider = new GoogleAuthProvider();
 // ─────────────────────────────────────────────────────
 
 /** Sign in with Google popup */
-export const signInWithGoogle = () => signInWithPopup(auth, googleProvider);
-
+export const signInWithGoogle = async () => {
+  if (Capacitor.isNativePlatform()) {
+    try {
+      // Initialize first, then sign in
+      await GoogleAuth.initialize({
+        clientId: '965089864427-ljber3lusl34mru515rhtk9m9it432ev.apps.googleusercontent.com',
+        scopes: ['profile', 'email'],
+        grantOfflineAccess: true,
+      });
+      const googleUser = await GoogleAuth.signIn();
+      const credential = GoogleAuthProvider.credential(
+          googleUser.authentication.idToken
+      );
+      return signInWithCredential(auth, credential);
+    } catch (err) {
+      console.error('Google Sign-in error:', err);
+      throw err;
+    }
+  } else {
+    return signInWithPopup(auth, googleProvider);
+  }
+};
 /** Create a new email/password account and save user doc */
 export const registerWithEmail = async (name, email, password) => {
   const cred = await createUserWithEmailAndPassword(auth, email, password);

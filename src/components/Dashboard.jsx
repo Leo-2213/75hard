@@ -3,7 +3,7 @@
 // Main dashboard — progress overview + 75-day grid
 // =====================================================
 import React, { useState, useEffect, useCallback } from 'react';
-import { logout, fetchUserProgress, saveDayProgress, fetchUserDoc } from '../services/firebase';
+import { logout, fetchUserProgress, saveDayProgress, fetchUserDoc, deleteAllProgress } from '../services/firebase';
 import DayCard  from './DayCard';
 import DayModal from './DayModal';
 import NamePromptModal from './NamePromptModal';
@@ -175,10 +175,11 @@ export default function Dashboard({ user }) {
   const [progress,      setProgress]      = useState({});   // { day_1: {...}, ... }
   const [selectedDay,   setSelectedDay]   = useState(null); // day number or null
   const [loadingData,   setLoadingData]   = useState(true);
-  const [userName,      setUserName]      = useState(true);
+  const [userName,      setUserName]      = useState('Champion');
   const [quoteIdx,      setQuoteIdx]      = useState(0);
   const [toast,         setToast]         = useState('');
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [resetting, setResetting] = useState(false);
 
   // ── Cycle quote every 10s ──
   useEffect(() => {
@@ -195,7 +196,10 @@ export default function Dashboard({ user }) {
           fetchUserDoc(user.uid),
         ]);
         setProgress(prog);
-        if (userDoc?.name) setUserName(userDoc.name.split(' ')[0]); // first name
+        
+        // Get name from Firestore, fallback to Firebase Auth displayName, then 'Champion'
+        const name = userDoc?.name || user.displayName || 'Champion';
+        setUserName(name.split(' ')[0]); // first name only
       } catch (err) {
         console.error('Failed to load data:', err);
         showToast('⚠️ Could not load data. Check connection.');
@@ -228,6 +232,22 @@ export default function Dashboard({ user }) {
   const showToast = (msg) => {
     setToast(msg);
     setTimeout(() => setToast(''), 3200);
+  };
+
+  // ── Reset progress ──
+  const handleReset = async () => {
+    setResetting(true);
+    try {
+      await deleteAllProgress(user.uid);
+      setProgress({});
+      setShowResetConfirm(false);
+      showToast('✅ Progress reset successfully!');
+    } catch (err) {
+      console.error('Reset failed:', err);
+      showToast('⚠️ Reset failed. Please retry.');
+    } finally {
+      setResetting(false);
+    }
   };
 
   // ── Logout ──
@@ -328,7 +348,7 @@ export default function Dashboard({ user }) {
 
             {/* Rotating quote */}
             <div style={S.quote}>
-              "{QUOTES[quoteIdx]}"
+              "{QUOTES[quoteIdx].replace('{name}', userName)}"
             </div>
           </div>
         </div>
@@ -383,13 +403,10 @@ export default function Dashboard({ user }) {
             <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
               <button
                 style={{ ...S.resetBtn, background: '#f09aba', color: 'white', margin: 0 }}
-                onClick={() => {
-                  setProgress({});
-                  setShowResetConfirm(false);
-                  showToast('Progress reset locally. Firestore data is preserved.');
-                }}
+                onClick={handleReset}
+                disabled={resetting}
               >
-                Yes, Reset
+                {resetting ? 'Resetting...' : 'Yes, Reset'}
               </button>
               <button
                 style={{ ...S.resetBtn, margin: 0 }}

@@ -19,6 +19,7 @@ import {
   getDoc,
   collection,
   getDocs,
+  deleteDoc,
   serverTimestamp,
 } from 'firebase/firestore';
 
@@ -82,8 +83,9 @@ export const createUserDoc = async (user, displayName) => {
   const snap    = await getDoc(userRef);
 
   if (!snap.exists()) {
+    const name = displayName || user.displayName || 'Champion';
     await setDoc(userRef, {
-      name:      displayName || user.displayName || 'Champion',
+      name:      name,
       email:     user.email,
       createdAt: serverTimestamp(),
     });
@@ -119,4 +121,14 @@ export const saveDayProgress = async (uid, dayNum, data) => {
 export const fetchUserDoc = async (uid) => {
   const snap = await getDoc(doc(db, 'users', uid));
   return snap.exists() ? snap.data() : null;
+};
+
+/**
+ * Delete all progress documents for a user.
+ */
+export const deleteAllProgress = async (uid) => {
+  const progressRef = collection(db, 'users', uid, 'progress');
+  const snapshot = await getDocs(progressRef);
+  const deletePromises = snapshot.docs.map((d) => deleteDoc(d.ref));
+  await Promise.all(deletePromises);
 };
